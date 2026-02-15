@@ -366,3 +366,49 @@ DELIMITER ;
 
 /* Q22: Execute the customer order summary stored procedure */
 CALL CUSTOMER_ORDER_SUMMARY(2,'2024-01-01','2024-12-31');
+
+/* ===============================
+   WINDOW FUNCTIONS
+   =============================== */
+
+/* Q23: Rank products by price within each category */
+SELECT 
+    PRODUCT_ID,
+    PRODUCT_NAME,
+    CATEGORY,
+    PRICE,
+    RANK() OVER (PARTITION BY CATEGORY ORDER BY PRICE DESC) AS PRICE_RANK
+FROM PRODUCTS;
+
+
+/* Q24: Find running total of sales amount for each customer */
+SELECT 
+    C.CUSTOMER_ID,
+    C.CUSTOMER_NAME,
+    O.ORDER_ID,
+    O.ORDER_DATE,
+    SUM(OI.QUANTITY * P.PRICE) 
+        OVER (PARTITION BY C.CUSTOMER_ID ORDER BY O.ORDER_DATE) AS RUNNING_TOTAL
+FROM CUSTOMERS C
+JOIN ORDERS O ON C.CUSTOMER_ID = O.CUSTOMER_ID
+JOIN ORDER_ITEMS OI ON O.ORDER_ID = OI.ORDER_ID
+JOIN PRODUCTS P ON OI.PRODUCT_ID = P.PRODUCT_ID;
+
+
+/* Q25: Find average product price compared with overall average */
+SELECT 
+    PRODUCT_ID,
+    PRODUCT_NAME,
+    PRICE,
+    AVG(PRICE) OVER () AS OVERALL_AVG_PRICE
+FROM PRODUCTS;
+
+
+/* Q26: Assign row numbers to orders based on order date */
+SELECT 
+    ORDER_ID,
+    CUSTOMER_ID,
+    ORDER_DATE,
+    ROW_NUMBER() OVER (ORDER BY ORDER_DATE) AS ORDER_SEQUENCE
+FROM ORDERS;
+
